@@ -130,12 +130,12 @@
   .datum .k{font-size:12px;color:var(--ink-faint);}
   .datum .v{font-family:var(--mono);font-size:19px;margin-top:2px;}
 
-  .bar-scale{display:flex;height:8px;border-radius:2px;overflow:hidden;margin:10px 0 6px;border:1px solid var(--line);}
+  .bar-scale{display:flex;height:8px;border-radius:2px;overflow:hidden;margin:2px 0 6px;border:1px solid var(--line);}
   .bar-scale span{flex:1;}
   .bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-faint);font-family:var(--mono);}
-  .marker-row{position:relative;height:0;}
+  .marker-row{position:relative;height:24px;margin-top:14px;}
   .marker{
-    position:absolute;top:-20px;transform:translateX(-50%);
+    position:absolute;top:0;transform:translateX(-50%);
     font-family:var(--mono);font-size:11px;color:var(--ink);
   }
   .marker::after{content:"▾";display:block;text-align:center;color:var(--ink);}
@@ -279,8 +279,8 @@
       <div class="datarow">
         <div class="datum"><div class="k">Approx. distance to coast</div><div class="v" id="wind-distance">—</div></div>
       </div>
-      <div class="bar-scale" id="wind-bar"></div>
       <div class="marker-row" id="wind-marker"></div>
+      <div class="bar-scale" id="wind-bar"></div>
       <div class="bar-labels"><span>Low</span><span>Moderate</span><span>High</span><span>Very high</span></div>
       <p class="note">Estimated from regional hurricane climatology, not a site-specific ASCE 7 design wind speed. For a precise design value, use the <a href="https://ascehazardtool.org" target="_blank" rel="noopener">ASCE 7 Hazard Tool</a>.</p>
     </section>
@@ -289,8 +289,8 @@
       <h2><span class="n">03</span>Wildfire Risk</h2>
       <h3 id="wildfire-tier-name">—</h3>
       <p id="wildfire-desc"></p>
-      <div class="bar-scale" id="wildfire-bar"></div>
       <div class="marker-row" id="wildfire-marker"></div>
+      <div class="bar-scale" id="wildfire-bar"></div>
       <div class="bar-labels"><span>Very low</span><span>Low</span><span>Moderate</span><span>High</span><span>Very high</span></div>
       <p class="note" id="wildfire-note">Source: FEMA National Risk Index (county-level). This reflects county-wide wildfire likelihood and exposure, not a parcel-specific defensible-space or vegetation assessment.</p>
     </section>
@@ -299,8 +299,8 @@
       <h2><span class="n">04</span>Earthquake Risk</h2>
       <h3 id="earthquake-tier-name">—</h3>
       <p id="earthquake-desc"></p>
-      <div class="bar-scale" id="earthquake-bar"></div>
       <div class="marker-row" id="earthquake-marker"></div>
+      <div class="bar-scale" id="earthquake-bar"></div>
       <div class="bar-labels"><span>Very low</span><span>Low</span><span>Moderate</span><span>High</span><span>Very high</span></div>
       <p class="note" id="earthquake-note">Source: FEMA National Risk Index (county-level). Reflects modeled seismic hazard and exposure for the county, not a site-specific soil or fault-line assessment.</p>
     </section>
@@ -309,8 +309,8 @@
       <h2><span class="n">05</span>Tornado Risk</h2>
       <h3 id="tornado-tier-name">—</h3>
       <p id="tornado-desc"></p>
-      <div class="bar-scale" id="tornado-bar"></div>
       <div class="marker-row" id="tornado-marker"></div>
+      <div class="bar-scale" id="tornado-bar"></div>
       <div class="bar-labels"><span>Very low</span><span>Low</span><span>Moderate</span><span>High</span><span>Very high</span></div>
       <p class="note" id="tornado-note">Source: FEMA National Risk Index (county-level). Reflects county-wide tornado likelihood and exposure, not a structure-specific assessment.</p>
     </section>
@@ -1250,6 +1250,31 @@ function downloadPDF(){
     doc.setFont('courier','normal'); doc.setFontSize(12); doc.setTextColor(24,33,41);
     doc.text(String(value), x, y+15);
   }
+  function drawTierBar(tier){
+    const segColors = ['#3C6E52','#6E8F52','#AD6E28','#C4762B','#96382A'];
+    const width = pageW - marginX*2, barHeight = 8, segGap = 1.2;
+    const segWidth = width / 5;
+    const tierNum = Math.max(1, Math.min(5, tier || 1));
+    ensureRoom(34);
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(24,33,41);
+    doc.text('Tier ' + tierNum, marginX + (tierNum - 0.5) * segWidth, y, {align:'center'});
+    y += 7;
+    for(let i = 0; i < 5; i++){
+      const segX = marginX + i * segWidth;
+      const c = hexToRgb(i < tierNum ? segColors[i] : '#DBDFD2');
+      doc.setFillColor(c.r, c.g, c.b);
+      doc.rect(segX, y, segWidth - segGap, barHeight, 'F');
+    }
+    y += barHeight + 9;
+    const labels = ['Very low','Low','Moderate','High','Very high'];
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(139,151,141);
+    labels.forEach((lbl, i) => {
+      if(i === 0) doc.text(lbl, marginX, y, {align:'left'});
+      else if(i === 4) doc.text(lbl, marginX + width, y, {align:'right'});
+      else doc.text(lbl, marginX + (i+0.5)*segWidth, y, {align:'center'});
+    });
+    y += 14;
+  }
 
   doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(24,33,41);
   doc.text('Groundtruth — Property Hazard Report', marginX, y); y += 26;
@@ -1345,6 +1370,7 @@ function downloadPDF(){
   const windMeta = tierMeta(r.windTier);
   body(windMeta.name + ' — Tier ' + r.windTier + ' of 5');
   body(windDescription(r.stateAbbr, r.windTier, r.windDistanceMiles));
+  drawTierBar(r.windTier);
   rule();
 
   function renderNriHazardPdf(num, noun, hazard, hazardErr){
@@ -1357,6 +1383,7 @@ function downloadPDF(){
       body('FEMA rates this county\u2019s ' + noun.toLowerCase() + ' likelihood and exposure as "' + hazard.ratingLabel.toLowerCase() + '."'
         + (typeof hazard.annualFreq === 'number' ? ' Modeled at roughly ' + hazard.annualFreq.toFixed(3) + ' ' + noun.toLowerCase() + ' events per year in this county.' : '')
         + ' County-wide planning figure, not a parcel-specific assessment.', 8.5);
+      drawTierBar(tier);
     }
     rule();
   }
