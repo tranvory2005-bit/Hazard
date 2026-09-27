@@ -118,7 +118,7 @@
   section.block{padding:34px 0;border-bottom:1px solid var(--line-soft);}
   section.block:last-of-type{border-bottom:none;}
   .block h2{
-    font-size:14px;font-family:var(--mono);font-weight:500;letter-spacing:0.01em;
+    font-size:19px;font-family:var(--mono);font-weight:500;letter-spacing:0.01em;
     color:var(--ink-soft);margin:0 0 18px;
   }
   .block h2 .n{color:var(--amber);margin-right:8px;}
@@ -252,7 +252,7 @@
     <div class="strip" id="summary-strip"></div>
 
     <section class="block">
-      <h2><span class="n">01</span>FEMA flood zone</h2>
+      <h2><span class="n">01</span>FEMA Flood Zone</h2>
       <h3 id="flood-zone-name">—</h3>
       <p id="flood-zone-desc"></p>
       <div class="datarow">
@@ -273,7 +273,7 @@
     </section>
 
     <section class="block">
-      <h2><span class="n">02</span>Hurricane / wind exposure</h2>
+      <h2><span class="n">02</span>Hurricane / Wind Exposure</h2>
       <h3 id="wind-tier-name">—</h3>
       <p id="wind-desc"></p>
       <div class="datarow">
@@ -286,14 +286,51 @@
     </section>
 
     <section class="block">
-      <h2><span class="n">03</span>Nearby historical loss events</h2>
+      <h2><span class="n">03</span>Wildfire Risk</h2>
+      <h3 id="wildfire-tier-name">—</h3>
+      <p id="wildfire-desc"></p>
+      <div class="bar-scale" id="wildfire-bar"></div>
+      <div class="marker-row" id="wildfire-marker"></div>
+      <div class="bar-labels"><span>Very low</span><span>Low</span><span>Moderate</span><span>High</span><span>Very high</span></div>
+      <p class="note" id="wildfire-note">Source: FEMA National Risk Index (county-level). This reflects county-wide wildfire likelihood and exposure, not a parcel-specific defensible-space or vegetation assessment.</p>
+    </section>
+
+    <section class="block">
+      <h2><span class="n">04</span>Earthquake Risk</h2>
+      <h3 id="earthquake-tier-name">—</h3>
+      <p id="earthquake-desc"></p>
+      <div class="bar-scale" id="earthquake-bar"></div>
+      <div class="marker-row" id="earthquake-marker"></div>
+      <div class="bar-labels"><span>Very low</span><span>Low</span><span>Moderate</span><span>High</span><span>Very high</span></div>
+      <p class="note" id="earthquake-note">Source: FEMA National Risk Index (county-level). Reflects modeled seismic hazard and exposure for the county, not a site-specific soil or fault-line assessment.</p>
+    </section>
+
+    <section class="block">
+      <h2><span class="n">05</span>Tornado Risk</h2>
+      <h3 id="tornado-tier-name">—</h3>
+      <p id="tornado-desc"></p>
+      <div class="bar-scale" id="tornado-bar"></div>
+      <div class="marker-row" id="tornado-marker"></div>
+      <div class="bar-labels"><span>Very low</span><span>Low</span><span>Moderate</span><span>High</span><span>Very high</span></div>
+      <p class="note" id="tornado-note">Source: FEMA National Risk Index (county-level). Reflects county-wide tornado likelihood and exposure, not a structure-specific assessment.</p>
+    </section>
+
+    <section class="block">
+      <h2><span class="n">06</span>Nearby Historical Loss Events</h2>
       <p id="disaster-intro"></p>
       <div class="timeline" id="disaster-timeline"></div>
       <p class="note">Source: FEMA Disaster Declarations Summary (OpenFEMA), filtered to this county. Reflects federally declared disasters only — it undercounts smaller, non-declared losses.</p>
     </section>
 
     <section class="block">
-      <h2><span class="n">04</span>Estimated insurance cost range</h2>
+      <h2><span class="n">07</span>EPA Contamination &amp; Environmental Hazards</h2>
+      <p id="epa-intro"></p>
+      <div class="timeline" id="epa-list"></div>
+      <p class="note" id="epa-note">Superfund (NPL) sites within 3 miles: EPA's own ArcGIS-hosted layer. Other EPA-regulated facilities within 1 mile: EPA's Facility Registry Service, on a best-effort basis (an older API that isn't always reachable from a browser). Proximity alone doesn't indicate contamination has reached this specific property — an environmental site assessment is the reliable way to know that.</p>
+    </section>
+
+    <section class="block">
+      <h2><span class="n">08</span>Estimated Insurance Cost Range</h2>
       <p>Illustrative annual premium ranges for a home valued around <span id="ins-homeval-echo">$350,000</span>, based on flood zone, wind exposure tier, and local disaster frequency. Homeowners and flood are usually two separate bills, not one — a lender may require only one of them depending on the flood zone. Individual quotes commonly land outside this range: wind mitigation credits (roof shape, opening protection, roof-to-wall connections) can swing the windstorm share of a bill by 20–45%, the hurricane deductible you choose below moves it roughly another 10–20% between 2% and 5%, and specialized carriers underwriting well-mitigated homes often price below the regional bucket used here. These figures are a planning range, not a quote.</p>
       <div class="datarow" style="margin-top:22px;">
         <div style="flex:1;min-width:220px;" class="ins-range">
@@ -314,7 +351,7 @@
     </section>
 
     <footer class="disclaim">
-      <p><strong>How to read this report.</strong> This is a screening tool for early diligence, not a substitute for a flood elevation certificate, a wind mitigation inspection, or an insurance quote. Flood zone data comes from FEMA's National Flood Hazard Layer where available; wind exposure and cost ranges are estimates built from public disaster records and regional risk patterns.</p>
+      <p><strong>How to read this report.</strong> This is a screening tool for early diligence, not a substitute for a flood elevation certificate, a wind mitigation inspection, an environmental site assessment, or an insurance quote. Flood zone data comes from FEMA's National Flood Hazard Layer where available; wind exposure and cost ranges are estimates built from public disaster records and regional risk patterns; wildfire, earthquake, and tornado ratings come from FEMA's National Risk Index (county level); nearby EPA-regulated facilities and Superfund sites come from EPA's Facility Registry Service and EPA's own ArcGIS-hosted Superfund layer.</p>
       <p id="footer-generated">Generated —</p>
     </footer>
   </div>
@@ -781,6 +818,95 @@ function disasterFrequencyBump(count){
   return 1.0;
 }
 
+// FEMA's National Risk Index, county-level hazard ratings -- a real,
+// documented, keyless ArcGIS-hosted feature service (independent of
+// hazards.fema.gov). Wildfire, earthquake, and tornado all live in the same
+// layer, so one query covers all three instead of three separate requests.
+const NRI_TIER_MAP = {
+  'very low': 1, 'relatively low': 2, 'relatively moderate': 3,
+  'relatively high': 4, 'very high': 5
+};
+
+function parseNriHazard(attrs, prefix){
+  const ratingRaw = (attrs[prefix + '_RISKR'] || '').toString().trim();
+  return {
+    ratingLabel: ratingRaw || 'Not rated',
+    tier: NRI_TIER_MAP[ratingRaw.toLowerCase()] || null,
+    annualFreq: (typeof attrs[prefix + '_AFREQ'] === 'number') ? attrs[prefix + '_AFREQ'] : null
+  };
+}
+
+async function getNriHazards(lat, lon){
+  const url = 'https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Counties/FeatureServer/0/query'
+    + '?geometry=' + lon + ',' + lat + '&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects'
+    + '&outFields=WFIR_RISKR,WFIR_AFREQ,ERQK_RISKR,ERQK_AFREQ,TRND_RISKR,TRND_AFREQ&returnGeometry=false&f=json';
+  const res = await fetchWithTimeout(url, undefined, 8000);
+  if(!res.ok) throw new Error('nri-http-' + res.status);
+  const data = await res.json();
+  if(!data.features || !data.features.length) return null;
+  const attrs = data.features[0].attributes || {};
+  return {
+    wildfire: parseNriHazard(attrs, 'WFIR'),
+    earthquake: parseNriHazard(attrs, 'ERQK'),
+    tornado: parseNriHazard(attrs, 'TRND')
+  };
+}
+
+// EPA Facility Registry Service (FRS) -- a real, documented, keyless federal
+// API supporting radius search by lat/lon. This is a legacy (~2014) Oracle-
+// backed service that may not send CORS headers permitting a browser's
+// fetch() to read the response at all, unlike the ArcGIS-hosted layers used
+// elsewhere in this report -- so it's treated as best-effort only, and a
+// failure here does not take down the higher-value Superfund check below.
+function normalizeFrsResponse(data){
+  if(Array.isArray(data)) return data;
+  if(data && Array.isArray(data.FRSFacility)) return data.FRSFacility;
+  if(data && data.Results && Array.isArray(data.Results.FRSFacility)) return data.Results.FRSFacility;
+  if(data && typeof data === 'object'){
+    const firstArray = Object.values(data).find(v => Array.isArray(v));
+    if(firstArray) return firstArray;
+  }
+  return [];
+}
+
+async function getGeneralEpaFacilitiesBestEffort(lat, lon){
+  try {
+    const url = 'https://ofmpub.epa.gov/frs_public2/frs_rest_services.get_facilities'
+      + '?latitude83=' + lat + '&longitude83=' + lon + '&search_radius=1&output=JSON';
+    const res = await fetchWithTimeout(url, undefined, 8000);
+    if(!res.ok) throw new Error('epa-frs-http-' + res.status);
+    return { list: normalizeFrsResponse(await res.json()), ok: true };
+  } catch(e){
+    console.error('General EPA facility search failed (best-effort, non-fatal):', e);
+    return { list: [], ok: false };
+  }
+}
+
+// EPA's own ArcGIS-hosted Superfund (National Priorities List) layer --
+// same reliable hosting pattern as the flood and wildfire data used
+// elsewhere in this report, rather than the legacy FRS API.
+async function getSuperfundSites(lat, lon, radiusMiles){
+  const url = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/'
+    + 'Superfund_National_Priorities_List_(NPL)_Sites_with_Status_Information/FeatureServer/0/query'
+    + '?geometry=' + lon + ',' + lat + '&geometryType=esriGeometryPoint&inSR=4326'
+    + '&distance=' + radiusMiles + '&units=esriSRUnit_StatuteMile&spatialRel=esriSpatialRelIntersects'
+    + '&outFields=NAME,City,State,County,NPL_STATUS&returnGeometry=false&f=json';
+  const res = await fetchWithTimeout(url, undefined, 8000);
+  if(!res.ok) throw new Error('epa-npl-http-' + res.status);
+  const data = await res.json();
+  return (data.features || []).map(f => f.attributes || {});
+}
+
+async function getEpaFacilities(lat, lon){
+  // Superfund query is allowed to throw (it's the reliable, high-value
+  // source); the general facility search never throws (best-effort only).
+  const [superfund, generalResult] = await Promise.all([
+    getSuperfundSites(lat, lon, 3),
+    getGeneralEpaFacilitiesBestEffort(lat, lon)
+  ]);
+  return { general: generalResult.list, generalOk: generalResult.ok, superfund };
+}
+
 async function runReport(){
   const addressRaw = document.getElementById('address-input').value.trim();
   if(!addressRaw){
@@ -806,6 +932,18 @@ async function runReport(){
     let disasters = [], disasterErr = false;
     try{ disasters = await getDisasterHistory(stateAbbr, county); } catch(e){ disasterErr = true; }
 
+    setStatus('Checking wildfire, earthquake, and tornado risk…');
+    let nriHazards = null, nriErr = false;
+    try{ nriHazards = await getNriHazards(lat, lon); } catch(e){ nriErr = true; }
+    const wildfire = nriHazards ? nriHazards.wildfire : null;
+    const earthquake = nriHazards ? nriHazards.earthquake : null;
+    const tornado = nriHazards ? nriHazards.tornado : null;
+    const wildfireErr = nriErr, earthquakeErr = nriErr, tornadoErr = nriErr;
+
+    setStatus('Checking EPA-regulated sites nearby…');
+    let epa = null, epaErr = false;
+    try{ epa = await getEpaFacilities(lat, lon); } catch(e){ epaErr = true; }
+
     setStatus('Estimating wind exposure and cost…');
     const windEst = estimateWindTier(stateAbbr, lat, lon);
     const windTier = windEst.tier;
@@ -830,6 +968,7 @@ async function runReport(){
     currentReport = {
       addressRaw, displayName: geo.display_name, lat, lon, stateAbbr, county,
       flood, floodErr, zoneKey, zoneInfo, disasters, disasterErr, windTier, windDistanceMiles, homeValue, mitigated, deductiblePct, includeFlood,
+      wildfire, wildfireErr, earthquake, earthquakeErr, tornado, tornadoErr, epa, epaErr,
       generatedAt: new Date()
     };
 
@@ -920,6 +1059,62 @@ function renderReport(r){
   const barColors = ['#3C6E52','#6E8F52','#AD6E28','#C4762B','#96382A'];
   document.getElementById('wind-bar').innerHTML = barColors.map((c,i)=>`<span style="background:${i < r.windTier ? c : 'var(--line-soft)'}"></span>`).join('');
   document.getElementById('wind-marker').innerHTML = `<div class="marker" style="left:${(r.windTier-0.5)/5*100}%">Tier ${r.windTier}</div>`;
+
+  // ---- NRI hazards: wildfire, earthquake, tornado (shared renderer) ----
+  function renderNriHazardSection(idPrefix, hazard, hazardErr, noun, unstudiedNote){
+    const tierName = document.getElementById(idPrefix + '-tier-name');
+    const desc = document.getElementById(idPrefix + '-desc');
+    const bar = document.getElementById(idPrefix + '-bar');
+    const marker = document.getElementById(idPrefix + '-marker');
+    const colors = ['#3C6E52','#6E8F52','#AD6E28','#C4762B','#96382A'];
+    if(hazardErr || !hazard){
+      tierName.textContent = noun + ' data unavailable';
+      desc.textContent = hazardErr
+        ? 'FEMA\u2019s National Risk Index service could not be reached just now.'
+        : ('No ' + noun.toLowerCase() + ' rating is on record for this county in FEMA\u2019s National Risk Index.');
+      bar.innerHTML = colors.map(()=>'<span style="background:var(--line-soft)"></span>').join('');
+      marker.innerHTML = '';
+    } else {
+      const tier = hazard.tier || 1;
+      tierName.textContent = hazard.ratingLabel + ' — Tier ' + tier + ' of 5';
+      desc.textContent = 'FEMA rates this county\u2019s ' + noun.toLowerCase() + ' likelihood and exposure as "' + hazard.ratingLabel.toLowerCase() + '."'
+        + (typeof hazard.annualFreq === 'number' ? ' Modeled at roughly ' + hazard.annualFreq.toFixed(3) + ' ' + noun.toLowerCase() + ' events per year in this county.' : '')
+        + ' This is a county-wide planning figure, ' + unstudiedNote;
+      bar.innerHTML = colors.map((c,i)=>`<span style="background:${i < tier ? c : 'var(--line-soft)'}"></span>`).join('');
+      marker.innerHTML = `<div class="marker" style="left:${(tier-0.5)/5*100}%">Tier ${tier}</div>`;
+    }
+  }
+  renderNriHazardSection('wildfire', r.wildfire, r.wildfireErr, 'Wildfire', 'not a parcel-specific assessment of vegetation, slope, or defensible space around this address.');
+  renderNriHazardSection('earthquake', r.earthquake, r.earthquakeErr, 'Earthquake', 'not a site-specific soil or fault-line assessment.');
+  renderNriHazardSection('tornado', r.tornado, r.tornadoErr, 'Tornado', 'not a structure-specific assessment.');
+
+  // ---- EPA environmental hazards ----
+  const epaIntro = document.getElementById('epa-intro');
+  const epaList = document.getElementById('epa-list');
+  if(r.epaErr){
+    epaIntro.textContent = 'EPA Superfund site data could not be retrieved right now.';
+    epaList.innerHTML = '';
+  } else {
+    const generalOk = r.epa && r.epa.generalOk;
+    const generalCount = (r.epa && r.epa.general) ? r.epa.general.length : 0;
+    const superfundCount = (r.epa && r.epa.superfund) ? r.epa.superfund.length : 0;
+    const generalPhrase = generalOk
+      ? `${generalCount} other EPA-regulated facilit${generalCount===1?'y':'ies'} within 1 mile`
+      : 'the broader EPA facility search wasn\u2019t available this time';
+    epaIntro.textContent = `${superfundCount} Superfund (NPL) site${superfundCount===1?'':'s'} found within 3 miles, and ${generalPhrase}:`;
+    const items = [];
+    (r.epa && r.epa.superfund || []).forEach(f => {
+      const city = f.City || f.CityName || '', state = f.State || f.StateAbbr || '';
+      items.push(`<div class="tl-item"><div class="yr" style="color:var(--risk-high);">NPL</div><div class="ttl">${escapeHtml(f.NAME || f.FacilityName || 'Superfund site')}</div><div class="sub">${escapeHtml(city)}${city?', ':''}${escapeHtml(state)} — Superfund National Priorities List site${f.NPL_STATUS ? ' (' + escapeHtml(f.NPL_STATUS) + ')' : ''}</div></div>`);
+    });
+    if(generalOk){
+      (r.epa && r.epa.general || []).slice(0, 8).forEach(f => {
+        const city = f.CityName || f.City || '', state = f.StateAbbr || f.State || '';
+        items.push(`<div class="tl-item"><div class="yr">•</div><div class="ttl">${escapeHtml(f.FacilityName || f.NAME || 'EPA-regulated facility')}</div><div class="sub">${escapeHtml(city)}${city?', ':''}${escapeHtml(state)}</div></div>`);
+      });
+    }
+    epaList.innerHTML = items.length ? items.join('') : '';
+  }
 
   // ---- disasters ----
   document.getElementById('disaster-intro').textContent = r.disasterErr
@@ -1152,7 +1347,55 @@ function downloadPDF(){
   body(windDescription(r.stateAbbr, r.windTier, r.windDistanceMiles));
   rule();
 
-  heading('3. Nearby Historical Loss Events');
+  function renderNriHazardPdf(num, noun, hazard, hazardErr){
+    heading(num + '. ' + noun + ' Risk');
+    if(hazardErr || !hazard){
+      body(hazardErr ? 'FEMA\u2019s National Risk Index service could not be reached at generation time.' : ('No ' + noun.toLowerCase() + ' rating is on record for this county.'));
+    } else {
+      const tier = hazard.tier || 1;
+      body(hazard.ratingLabel + ' — Tier ' + tier + ' of 5');
+      body('FEMA rates this county\u2019s ' + noun.toLowerCase() + ' likelihood and exposure as "' + hazard.ratingLabel.toLowerCase() + '."'
+        + (typeof hazard.annualFreq === 'number' ? ' Modeled at roughly ' + hazard.annualFreq.toFixed(3) + ' ' + noun.toLowerCase() + ' events per year in this county.' : '')
+        + ' County-wide planning figure, not a parcel-specific assessment.', 8.5);
+    }
+    rule();
+  }
+  renderNriHazardPdf('3', 'Wildfire', r.wildfire, r.wildfireErr);
+  renderNriHazardPdf('4', 'Earthquake', r.earthquake, r.earthquakeErr);
+  renderNriHazardPdf('5', 'Tornado', r.tornado, r.tornadoErr);
+
+  heading('6. EPA Contamination & Environmental Hazards');
+  if(r.epaErr){
+    body('EPA Superfund site data service unavailable at generation time.');
+  } else {
+    const generalOk = r.epa && r.epa.generalOk;
+    const generalList = (r.epa && r.epa.general) || [];
+    const superfundList = (r.epa && r.epa.superfund) || [];
+    const generalPhrase = generalOk ? generalList.length + ' other EPA-regulated facility/ies within 1 mile' : 'the broader EPA facility search was not available for this PDF';
+    body(superfundList.length + ' Superfund (NPL) site(s) within 3 miles; ' + generalPhrase + '.');
+    superfundList.forEach(f => {
+      ensureRoom(24);
+      doc.setFont('courier','normal'); doc.setFontSize(9); doc.setTextColor(150,56,42);
+      doc.text('NPL', marginX, y);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(24,33,41);
+      const name = doc.splitTextToSize(String(f.NAME || f.FacilityName || 'Superfund site'), pageW - marginX*2 - 30);
+      doc.text(name, marginX+30, y);
+      y += name.length*12 + 6;
+    });
+    if(generalOk){
+      generalList.slice(0, 8).forEach(f => {
+        ensureRoom(16);
+        doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(70,80,86);
+        const line = doc.splitTextToSize('\u2022 ' + String(f.FacilityName || f.NAME || 'EPA-regulated facility'), pageW - marginX*2);
+        doc.text(line, marginX, y);
+        y += line.length*12 + 4;
+      });
+    }
+  }
+  body('Proximity alone doesn\u2019t indicate contamination has reached this property; an environmental site assessment is the reliable way to know that.', 8.5);
+  rule();
+
+  heading('7. Nearby Historical Loss Events');
   if(r.disasterErr){
     body('Disaster history service unavailable at generation time.');
   } else if(!r.disasters.length){
@@ -1173,7 +1416,7 @@ function downloadPDF(){
   }
   rule();
 
-  heading('4. Estimated Insurance Cost Range');
+  heading('8. Estimated Insurance Cost Range');
   const scale = Math.min(Math.max(r.homeValue/350000, 0.5), 3);
   const [homeLo, homeHi] = scoreToHomeRange(r.windTier, scale, r.mitigated, r.deductiblePct);
   const [floodLoRaw, floodHiRaw] = scoreToFloodRange(r.zoneInfo.risk, scale * disasterFrequencyBump(r.disasters.length));
